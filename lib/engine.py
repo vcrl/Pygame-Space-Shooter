@@ -16,18 +16,21 @@ class Engine:
 
     def load_data(self):
         self.menu_group = pygame.sprite.Group()
-        self.player = Player(self, 10*TILESIZE, 10)
+        self.player = Player(self, 10, 2)
         self.map = TiledMap_Manager(self)
+        self.map.chunk_spawning()
+
+    def map_update(self):
+        self.map.update()
+        self.map.screen_scrolling()
+        self.map.chunk_killing()
         self.map.chunk_spawning()
 
     def update(self):
         if self.state != "paused":
             map_group.update()
             all_sprites.update()
-            self.map.update()
-            self.map.screen_scrolling()
-            self.map.chunk_killing()
-            self.map.chunk_spawning()
+            self.map_update()
 
     def draw(self):
         self.screen.fill(BLACK)
@@ -64,8 +67,7 @@ class Engine:
                     self.player.state["debug_mode"] = True
 
                 if event.key == pygame.K_SPACE:
-                    for sprite in map_group:
-                        sprite.kill()
+                    pass
                 if event.key == pygame.K_ESCAPE:
                     self.pause_menu()
 

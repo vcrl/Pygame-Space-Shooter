@@ -1,5 +1,5 @@
 import os, pytmx, pygame, random
-from .sprites import Player, Wall, all_sprites, walls, map_group
+from .sprites import Player, Wall, Obstacles,all_sprites, walls, map_group, obstacles
 from .settings import *
 vec = pygame.math.Vector2
 
@@ -87,7 +87,7 @@ class TiledMap(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.walls = list()
         self.pos = vec(x, y)
-        self.scroll = [2, 0]
+        self.scroll = [0, 0]
         self.rect.x = self.pos.x
         self.rect.y = self.pos.y
         self.state = {
@@ -142,10 +142,11 @@ class TiledMap_Manager:
     def __init__(self, game):
         self.game = game
         self.map = list()
+        self.obstacles = list()
         self.map_management = {
             "blocks_spawned" : 1
         }
-        self.scroll = [2, 0]
+        self.scroll = [0, 0]
         self.state = {
             "moving" : False,
         }
@@ -167,14 +168,55 @@ class TiledMap_Manager:
     def chunk_spawning(self):
         if self.chunk_count < 2:
             self.map.append(TiledMap(self.game, os.path.join(maps_dir, "default.tmx"), CHUNK_WIDTH-TILESIZE, 0))
+            self.obstacles.append(Obstacles(
+                self,
+                self.game, 
+                random.randint(0, DEFAULT_WIDTH/TILESIZE), #x
+                -1, #y
+                random.randint(TILESIZE, TILESIZE*5), #w
+                random.randint(TILESIZE, TILESIZE*5) #h
+                ))
+            self.obstacles.append(Obstacles(
+                self,
+                self.game, 
+                random.randint((DEFAULT_WIDTH/TILESIZE)/2, DEFAULT_WIDTH/TILESIZE), #x
+                -1, #y
+                random.randint(TILESIZE, TILESIZE*5), #w
+                random.randint(TILESIZE, TILESIZE*5) #h
+                ))
+            self.obstacles.append(Obstacles(
+                self,
+                self.game, 
+                random.randint(0, DEFAULT_WIDTH/TILESIZE), #x
+                -1, #y
+                random.randint(TILESIZE, TILESIZE*5), #w
+                random.randint(TILESIZE, TILESIZE*5) #h
+                ))
+            self.obstacles.append(Obstacles(
+                self,
+                self.game, 
+                random.randint((DEFAULT_WIDTH/TILESIZE)/2, DEFAULT_WIDTH/TILESIZE), #x
+                -1, #y
+                random.randint(TILESIZE, TILESIZE*5), #w
+                random.randint(TILESIZE, TILESIZE*5) #h
+                ))
     
     def kill_chunk(self, chunk):
         self.map.remove(chunk)
+        for wall in chunk.walls:
+            wall.kill()
+        for obstacle in obstacles:
+            if obstacle.rect.y > DEFAULT_WIDTH:
+                obstacle.kill()
         chunk.kill()
 
 
     def screen_scrolling(self):
         self.state["moving"] = True
+        for obs in obstacles:
+            print(obs.rect.x)
+            obs.pos.x -= int(self.scroll[0])
+            obs.pos.y -= int(self.scroll[1])
         for maps in self.map:
             maps.state["moving"] = True
             self.scroll[0] += SCROLL_RATE * self.game.dt
@@ -182,6 +224,3 @@ class TiledMap_Manager:
             for wall in maps.walls:
                 wall.rect.x -= int(self.scroll[0])
                 wall.rect.y -= int(self.scroll[1])
-        for sprite in all_sprites:
-            sprite.rect.x -= int(self.scroll[0])
-            sprite.rect.y -= int(self.scroll[1])
