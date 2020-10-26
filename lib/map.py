@@ -145,7 +145,7 @@ class TiledMap_Manager:
         self.map_management = {
             "blocks_spawned" : 1
         }
-        self.scroll = [1, 0]
+        self.scroll = [2, 0]
         self.state = {
             "moving" : False,
         }
@@ -179,11 +179,9 @@ class TiledMap_Manager:
             maps.state["moving"] = True
             self.scroll[0] += SCROLL_RATE * self.game.dt
             maps.rect.x -= int(self.scroll[0])
-        
-        for wall in walls:
-            wall.rect.x -= int(self.scroll[0])
-            wall.rect.y -= int(self.scroll[0])
-
+            for wall in maps.walls:
+                wall.rect.x -= int(self.scroll[0])
+                wall.rect.y -= int(self.scroll[1])
         for sprite in all_sprites:
             sprite.rect.x -= int(self.scroll[0])
             sprite.rect.y -= int(self.scroll[1])
